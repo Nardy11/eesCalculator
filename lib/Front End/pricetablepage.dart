@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ees_calculator/Back%20End/Models/products.dart';
 import 'package:ees_calculator/Front%20End/priceenteringpage.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,64 @@ class PriceTablePage extends StatefulWidget {
 }
 
 class _PriceTablePageState extends State<PriceTablePage> {
+  List<Products> products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Products').get();
+    List<Products> loaded = snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return Products.fromMap(data, doc.id);
+    }).toList();
+
+    setState(() {
+      products = loaded;
+    });
+  }
+
+  double calculateMaterialWeight(Products p) {
+    double density = p.materialType == "copper" ? 0.7:0.7; // g/cm³ edit
+    return p.numberOfMeters * p.numberOfEnds * density * p.wireDiameter * p.wireDiameter;
+  }
+
+  TableRow buildProductRow(Products p, int index) {
+    double materialWeight = calculateMaterialWeight(p);
+    double materialCost = materialWeight * widget.itemPrice;
+    double plasticCost = p.plasticWeight * widget.plasticPrice;
+    double rawMaterialCost = materialCost + plasticCost;
+    double manufacturingCost = materialWeight * p.twistingCostPerKg;
+    double coilPrice = rawMaterialCost + manufacturingCost;
+    double coilPriceInvoice = coilPrice * 1.14;
+
+    return TableRow(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+      ),
+      children: [
+        _buildTableCell(coilPriceInvoice.toStringAsFixed(2)),
+        _buildTableCell(coilPrice.toStringAsFixed(2)),
+        _buildTableCell(manufacturingCost.toStringAsFixed(2)),
+        _buildTableCell(rawMaterialCost.toStringAsFixed(2)),
+        _buildTableCell(plasticCost.toStringAsFixed(2)),
+        _buildTableCell(p.plasticWeight.toStringAsFixed(2)),
+        _buildTableCell(p.coilWeight.toStringAsFixed(2)),
+        _buildTableCell(materialCost.toStringAsFixed(2)),
+        _buildTableCell(p.twistingCostPerKg.toStringAsFixed(2)),
+        _buildTableCell(materialWeight.toStringAsFixed(2)),
+        _buildTableCell(p.numberOfMeters.toString()),
+        _buildTableCell(p.numberOfEnds.toString()),
+        _buildTableCell(p.wireDiameter.toStringAsFixed(2)),
+        _buildTableCell(p.productDescription),
+        _buildTableCell(p.code),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,10 +113,7 @@ class _PriceTablePageState extends State<PriceTablePage> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-                Image.asset(
-                  "assets/logo.png",
-                  width: 300,
-                ),
+                Image.asset("assets/logo.png", width: 300),
                 const SizedBox(height: 50),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -64,19 +121,13 @@ class _PriceTablePageState extends State<PriceTablePage> {
                     Text(
                       "سعر البلاستيك: ${widget.plasticPrice.toStringAsFixed(2)} جنيه",
                       style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                          fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(width: 20),
                     Text(
                       "سعر ${widget.itemname}: ${widget.itemPrice.toStringAsFixed(2)} جنيه",
                       style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                          fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ],
                 ),
@@ -88,26 +139,26 @@ class _PriceTablePageState extends State<PriceTablePage> {
                       child: Table(
                         border: TableBorder.all(color: Colors.white, width: 2),
                         columnWidths: const {
-                          0: FixedColumnWidth(68),
+
+                          0: FixedColumnWidth(120),
                           1: FixedColumnWidth(68),
-                          2: FixedColumnWidth(68),
-                          3: FixedColumnWidth(68),
-                          4: FixedColumnWidth(68),
-                          5: FixedColumnWidth(68),
-                          6: FixedColumnWidth(68),
-                          7: FixedColumnWidth(68),
-                          8: FixedColumnWidth(68),
-                          9: FixedColumnWidth(68),
+                          2: FixedColumnWidth(80),
+                          3: FixedColumnWidth(90),
+                          4: FixedColumnWidth(90),
+                          5: FixedColumnWidth(90),
+                          6: FixedColumnWidth(90),
+                          7: FixedColumnWidth(100),
+                          8: FixedColumnWidth(120),
+                          9: FixedColumnWidth(85),
                           10: FixedColumnWidth(68),
-                          11: FixedColumnWidth(68),
+                          11: FixedColumnWidth(74),
                           12: FixedColumnWidth(68),
-                          13: FixedColumnWidth(80*4),
+                          13: FixedColumnWidth(80 * 4),
                           14: FixedColumnWidth(50),
                         },
                         children: [
                           TableRow(
-                            decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.8)),
+                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.8)),
                             children: [
                               _buildTableHeader('ثمن اللفة بالفاتورة'),
                               _buildTableHeader('ثمن اللفة'),
@@ -118,8 +169,7 @@ class _PriceTablePageState extends State<PriceTablePage> {
                               _buildTableHeader('وزن اللفة بالكيلو'),
                               _buildTableHeader('تكلفة ${widget.itemname}'),
                               _buildTableHeader('تكلفة الجدل للكيلو'),
-                              _buildTableHeader(
-                                  'وزن ${widget.itemname} بالكيلو'),
+                              _buildTableHeader('وزن ${widget.itemname} بالكيلو'),
                               _buildTableHeader('عدد الامتار'),
                               _buildTableHeader('عدد الاطراف'),
                               _buildTableHeader('قطر السلك'),
@@ -127,7 +177,7 @@ class _PriceTablePageState extends State<PriceTablePage> {
                               _buildTableHeader('كود'),
                             ],
                           ),
-                          ...generateTableRows(15),
+                          ...products.asMap().entries.map((entry) => buildProductRow(entry.value, entry.key)).toList(),
                         ],
                       ),
                     ),
@@ -141,22 +191,6 @@ class _PriceTablePageState extends State<PriceTablePage> {
     );
   }
 
-  List<TableRow> generateTableRows(int numRows) {
-    return List.generate(numRows, (rowIndex) {
-      return TableRow(
-        decoration: BoxDecoration(
-          color: rowIndex % 2 == 0
-              ? Colors.grey.withOpacity(0.2)
-              : Colors.white.withOpacity(0.8),
-        ),
-        children: List.generate(
-          15,
-          (colIndex) => _buildTableCell('${colIndex + rowIndex * 5}'),
-        ),
-      );
-    });
-  }
-
   Widget _buildTableHeader(String text) {
     return Center(
       child: Padding(
@@ -164,11 +198,7 @@ class _PriceTablePageState extends State<PriceTablePage> {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: Colors.black,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
         ),
       ),
     );
@@ -177,14 +207,11 @@ class _PriceTablePageState extends State<PriceTablePage> {
   Widget _buildTableCell(String text) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(6.0),
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black,
-          ),
+          style: const TextStyle(fontSize: 14, color: Colors.black),
         ),
       ),
     );

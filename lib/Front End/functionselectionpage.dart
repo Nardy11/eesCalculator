@@ -72,7 +72,7 @@ class _FunctionSelectionPageState extends State<FunctionSelectionPage> {
                     const SizedBox(height: 20),
 
                     // Greeting Message under the logo
-                    _buildHeaderWithTextBorder('مرحبا'),
+                    _buildHeaderWithTextBorder('${widget.username} مرحبا '),
                     _buildHeaderWithTextBorder('كيف يمكنني مساعدتك اليوم؟'),
 
                     const SizedBox(height: 40),

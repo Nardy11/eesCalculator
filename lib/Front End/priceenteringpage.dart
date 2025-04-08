@@ -93,6 +93,12 @@ class _PriceEnteringPageState extends State<PriceEnteringPage> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               hintText: '10 EGP/Kilo',
+                              suffixText: 'EGP/Kilo',
+                              suffixStyle: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                               errorStyle: const TextStyle(
                                 fontSize: 20, // Customize error text size
                                 color: Colors.red,
@@ -118,12 +124,19 @@ class _PriceEnteringPageState extends State<PriceEnteringPage> {
                             controller: plasticPriceController,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.8),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                hintText: '10 EGP/Kilo'),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.8),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              hintText: '10 EGP/Kilo',
+                              suffixText: 'EGP/Kilo',
+                              suffixStyle: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),

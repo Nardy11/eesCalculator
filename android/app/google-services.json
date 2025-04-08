@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "321352161067",
+    "firebase_url": "https://eescalculator-df5ef-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "eescalculator-df5ef",
+    "storage_bucket": "eescalculator-df5ef.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:321352161067:android:fba3482be05b6609a7176e",
+        "android_client_info": {
+          "package_name": "com.example.ees_calculator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3WEwEXguOltp6TbZB_w0j62TVMIzkR_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

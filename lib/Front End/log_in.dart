@@ -1,3 +1,4 @@
+import 'package:ees_calculator/Back%20End/Controllers/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:ees_calculator/Front%20End/selectionpage.dart';
 import 'dart:ui'; // For BackdropFilter
@@ -52,7 +53,8 @@ class _LoginPageState extends State<LoginPage> {
                       alignment: Alignment.topCenter,
                       child: Image.asset(
                         "assets/logo.png",
-                        width: isSmallScreen ? size.width * 0.7 : size.width * 0.4,
+                        width:
+                            isSmallScreen ? size.width * 0.7 : size.width * 0.4,
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -60,7 +62,8 @@ class _LoginPageState extends State<LoginPage> {
                     // Email Field
                     _buildHeaderWithTextBorder('ادخل البريد الإلكتروني'),
                     SizedBox(
-                      width: isSmallScreen ? size.width * 0.85 : size.width * 0.5,
+                      width:
+                          isSmallScreen ? size.width * 0.85 : size.width * 0.5,
                       child: TextFormField(
                         controller: emailController,
                         textAlign: TextAlign.center,
@@ -72,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           hintText: 'example@email.com',
                           errorStyle: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 20,
                             color: Colors.red,
                           ),
                         ),
@@ -91,7 +94,8 @@ class _LoginPageState extends State<LoginPage> {
                     // Password Field
                     _buildHeaderWithTextBorder('ادخل كلمة السر'),
                     SizedBox(
-                      width: isSmallScreen ? size.width * 0.85 : size.width * 0.5,
+                      width:
+                          isSmallScreen ? size.width * 0.85 : size.width * 0.5,
                       child: TextFormField(
                         controller: passwordController,
                         textAlign: TextAlign.center,
@@ -102,16 +106,23 @@ class _LoginPageState extends State<LoginPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          hintText: '********',
+                          hintText: 'ادخل كلمة السر',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {
                                 _obscurePassword = !_obscurePassword;
                               });
                             },
+                          ),
+                           errorStyle:const TextStyle(
+                            fontSize: 20, 
+                            color: Colors.red,
+
                           ),
                         ),
                         validator: (value) {
@@ -126,16 +137,39 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Login Button
                     SizedBox(
-                      width: isSmallScreen ? size.width * 0.85 : size.width * 0.5,
+                      width:
+                          isSmallScreen ? size.width * 0.85 : size.width * 0.5,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SelectionPage(username: emailController.text),
-                              ),
-                            );
+                            String email = emailController.text;
+                            String password = passwordController.text;
+                            try {
+                              var user = await AuthService()
+                                  .signInWithEmailPassword(
+                                      context, email, password);
+
+                              if (user != null) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        SelectionPage(username: user.name),
+                                  ),
+                                );
+                              } else {
+                                showSnackbar(
+                                    'البريد الإلكتروني أو كلمة السر غير صحيحة',
+                                    Colors.red,
+                                    1000);
+                              }
+                            } catch (e) {
+                              // Handle any errors from Firebase Auth (incorrect email/password)
+                              showSnackbar(
+                                  'حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.',
+                                  Colors.red,
+                                  1000);
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -184,6 +218,23 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void showSnackbar(String message, Color color, int duration) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        duration: Duration(milliseconds: duration),
       ),
     );
   }

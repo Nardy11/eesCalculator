@@ -66,5 +66,27 @@ class Products {
     materialWeight = newMaterialWeight;
     materialCost = newMaterialCost;
   }
+
+  factory Products.fromMap(Map<String, dynamic> data, String documentId) {
+    return Products(
+      id: documentId,
+      productDescription: data['productDescription'] ?? '',
+      code: data['code'] ?? '',
+      numberOfEnds: data['numberOfEnds'] ?? 0,
+      numberOfMeters: (data['numberOfMeters'] ?? 0).toDouble(),
+      wireDiameter: (data['wireDiameter'] ?? 0).toDouble(),
+      coilWeight: (data['coilWeight'] ?? 0).toDouble(),
+      plasticWeight: (data['plasticWeight'] ?? 0).toDouble(),
+      twistingCostPerKg: (data['twistingCostPerKg'] ?? 0).toDouble(),
+      materialType: data['materialType'] ?? 'copper',
+      plasticCost: data['plasticCost']??0,
+      rawMaterialCost: data['rawMaterialCost']??0,
+      manufacturingCost: data['manufacturingCost']??0,
+      coilPrice: data['coilPrice']??0,
+      coilPriceInvoice: data['coilPriceInvoice']??0,
+      materialCost: data['materialCost']??0,
+      materialWeight: data['materialWeight']??0
+    );
+  }
 }
  

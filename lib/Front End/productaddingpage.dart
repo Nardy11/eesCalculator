@@ -1,3 +1,5 @@
+import 'package:ees_calculator/Back%20End/Models/products.dart';
+import 'package:ees_calculator/Back%20End/Controllers/product_controller.dart';
 import 'package:ees_calculator/Front%20End/priceenteringpage.dart';
 import 'package:flutter/material.dart';
 
@@ -26,11 +28,23 @@ class _ProductaddingpageState extends State<Productaddingpage> {
 
   void calculateWireWeight() {
     setState(() {
-      wireWeight = 0.0;
+      try {
+        // Ensure all required fields are filled and are valid numbers
+        double numberOfMeters = double.parse(controllers[0][10].text.trim());
+        int numberOfEnds = int.parse(controllers[0][11].text.trim());
+        double wireDiameter = double.parse(controllers[0][12].text.trim());
+
+        // Calculate wire weight
+        wireWeight =
+            numberOfMeters * numberOfEnds * 0.7 * wireDiameter * wireDiameter;
+      } catch (e) {
+        wireWeight =
+            0.0; // Reset wireWeight in case of any error (invalid input)
+      }
     });
   }
 
-  void validateAndSubmit() {
+  void validateAndSubmit() async {
     bool allFieldsFilled = true;
     bool validNumbers = true;
 
@@ -38,18 +52,75 @@ class _ProductaddingpageState extends State<Productaddingpage> {
       String value = controllers[0][j].text.trim();
       if (value.isEmpty) {
         allFieldsFilled = false;
-      } else if (j != 13 && double.tryParse(value) == null) {
+      } else if (j != 13 && double.tryParse(value) == null && j != 14) {
         validNumbers = false;
       }
     }
 
     if (!allFieldsFilled) {
       showSnackbar("يجب ملء جميع الحقول", Colors.red);
-    } else if (!validNumbers) {
+      return;
+    }
+
+    if (!validNumbers) {
       showSnackbar(
           "يجب إدخال أرقام فقط في جميع الحقول ماعدا وصف الصنف", Colors.red);
-    } else {
+      return;
+    }
+
+    try {
+      double numberOfMeters = double.parse(controllers[0][10].text.trim());
+      int numberOfEnds = int.parse(controllers[0][11].text.trim());
+      double wireDiameter = double.parse(controllers[0][12].text.trim());
+
+      // Weight calculation
+      double materialWeight =
+          numberOfMeters * numberOfEnds * 0.7 * wireDiameter * wireDiameter;
+
+      // Creating product object
+      double twistingCostPerKg = double.parse(controllers[0][8].text.trim());
+      double plasticWeight = double.parse(controllers[0][5].text.trim());
+
+      double materialCost = materialWeight * widget.itemPrice;
+      double plasticCost = plasticWeight * widget.plasticPrice;
+      double rawMaterialCost = materialCost + plasticCost;
+      double manufacturingCost = materialWeight * twistingCostPerKg;
+      double coilPrice = rawMaterialCost + manufacturingCost;
+      double coilPriceInvoice = coilPrice * 1.14;
+
+      Products newProduct = Products(
+        id: controllers[0][14].text.trim(),
+        code: controllers[0][14].text.trim(),
+        productDescription: controllers[0][13].text.trim(),
+        numberOfMeters: numberOfMeters,
+        numberOfEnds: numberOfEnds,
+        wireDiameter: wireDiameter,
+        coilWeight: double.parse(controllers[0][6].text.trim()),
+        plasticWeight: plasticWeight,
+        twistingCostPerKg: twistingCostPerKg,
+        materialType: widget.itemname,
+        materialWeight: materialWeight,
+        materialCost: materialCost,
+        plasticCost: plasticCost,
+        rawMaterialCost: rawMaterialCost,
+        manufacturingCost: manufacturingCost,
+        coilPrice: coilPrice,
+        coilPriceInvoice: coilPriceInvoice,
+      );
+
+      await ProductService.createProduct(newProduct);
       showSnackbar("تم اضافه المنتج بنجاح", Colors.green);
+
+      // Clear all the fields after submission
+      controllers
+          .forEach((list) => list.forEach((controller) => controller.clear()));
+
+      // Optionally, reset the wire weight after clearing the fields
+      setState(() {
+        wireWeight = 0.0;
+      });
+    } catch (e) {
+      showSnackbar("حدث خطأ أثناء الحفظ: $e", Colors.red);
     }
   }
 
@@ -129,20 +200,20 @@ class _ProductaddingpageState extends State<Productaddingpage> {
                       child: Table(
                         border: TableBorder.all(color: Colors.white, width: 2),
                         columnWidths: const {
-                          0: FixedColumnWidth(68),
+                          0: FixedColumnWidth(120),
                           1: FixedColumnWidth(68),
-                          2: FixedColumnWidth(68),
-                          3: FixedColumnWidth(68),
-                          4: FixedColumnWidth(68),
-                          5: FixedColumnWidth(68),
-                          6: FixedColumnWidth(68),
-                          7: FixedColumnWidth(68),
-                          8: FixedColumnWidth(68),
-                          9: FixedColumnWidth(68),
+                          2: FixedColumnWidth(80),
+                          3: FixedColumnWidth(90),
+                          4: FixedColumnWidth(90),
+                          5: FixedColumnWidth(90),
+                          6: FixedColumnWidth(90),
+                          7: FixedColumnWidth(100),
+                          8: FixedColumnWidth(120),
+                          9: FixedColumnWidth(85),
                           10: FixedColumnWidth(68),
-                          11: FixedColumnWidth(68),
+                          11: FixedColumnWidth(74),
                           12: FixedColumnWidth(68),
-                          13: FixedColumnWidth(80*4),
+                          13: FixedColumnWidth(80 * 4),
                           14: FixedColumnWidth(50),
                         },
                         children: [
